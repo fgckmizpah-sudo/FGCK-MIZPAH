@@ -1,0 +1,270 @@
+.app-shell {
+  min-height: 100vh;
+}
+
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+  align-items: start;
+}
+
+.page-content {
+  padding: 24px;
+  background: #f4f7fb;
+}
+
+.section-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(28, 33, 70, 0.08);
+  margin-bottom: 20px;
+}
+
+.table-list {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-list th,
+.table-list td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e8edf7;
+}
+
+.table-list th {
+  color: #4b587c;
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-field label {
+  font-size: 0.95rem;
+  color: #4b587c;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #d9e0f2;
+  background: #f9fbff;
+}
+
+.button-primary,
+.button-secondary {
+  border: none;
+  padding: 12px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.button-primary {
+  background: #2f6dff;
+  color: white;
+}
+
+.action-button {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.action-menu {
+  position: absolute;
+  right: 0;
+  top: 42px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  z-index: 10;
+}
+
+.action-menu button {
+  background: transparent;
+  border: none;
+  padding: 12px 16px;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+}
+
+.action-menu button:hover {
+  background: #f3f4f6;
+}
+
+.button-secondary {
+  background: #f4f7fb;
+  color: #333;
+}
+
+.section-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.close-button {
+  background: #dc2626;
+  color: #fff;
+  border: 1px solid #b91c1c;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.close-button:hover {
+  opacity: 0.95;
+}
+
+.navbar {
+  background: #1c2541;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  min-height: auto;
+  max-height: calc(100vh - 48px);
+}
+
+.navbar h2,
+.navbar p {
+  margin: 0 0 16px;
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: auto;
+  overflow-y: auto;
+  max-height: calc(100vh - 220px);
+}
+
+.nav-link {
+  display: inline-block;
+  color: #cbd7ff;
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+}
+
+.nav-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.nav-link.active {
+  color: #ffffff;
+  background: #2f6dff;
+}
+
+.logout-button {
+  margin-top: 24px;
+  background: #fe5f55;
+  color: #fff;
+}
+
+.alert {
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  background: #fff3cd;
+  border-radius: 12px;
+  color: #6c4b00;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+}
+
+.admin-panel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.admin-panel-item {
+  background: #eef2ff;
+  border: 1px solid #dbe4ff;
+  padding: 16px 18px;
+  border-radius: 16px;
+  color: #1f2937;
+  font-weight: 600;
+  text-align: center;
+}
+
+.search-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.search-row input,
+.search-row select {
+  flex: 1;
+}
+
+.category-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.cat-button {
+  background: #f4f7fb;
+  border: 1px solid #d9e0f2;
+  padding: 8px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.cat-button.selected {
+  background: #2f6dff;
+  color: #fff;
+  border-color: #2f6dff;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: #f4f7fb;
+  color: #20232a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}

@@ -1,0 +1,27 @@
+{
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    },
+    "dockerfilePath": "./Dockerfile"
+  },
+  "deployments": [
+    {
+      "name": "mizpah-management",
+      "service": "web"
+    }
+  ],
+  "services": [
+    {
+      "name": "web",
+      "type": "web",
+      "dockerfilePath": "./Dockerfile",
+      "startCommand": "npm --workspace server run start",
+      "env": [
+        "DATABASE_URL",
+        "JWT_SECRET",
+        "PORT"
+      ]
+    }
+  ]
+}
