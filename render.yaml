@@ -18,15 +18,13 @@ services:
     buildCommand: "npm --prefix client install && npm --prefix client run build"
     publishPath: client/dist
 
-databases:
-  - type: postgres
-    name: mizpah-db
-    plan: starter
-
 # Notes:
-# - On Render dashboard, after the Postgres DB is created, copy the DATABASE_URL into
-#   the `mizpah-server` service environment variables (key: DATABASE_URL).
-# - Set JWT_SECRET and NODE_ENV=production in the server's env vars for security.
-# - In the client service, set an env var `VITE_API_BASE_URL` to
-#   "https://<mizpah-server>.onrender.com/api" (replace with your backend URL).
+# - Render-managed Postgres requires billing information and is not available for fully free deployment.
+# - For a free shared database across devices, use an external Postgres provider such as Neon.
+# - In the `mizpah-server` service environment variables, set:
+#   - DATABASE_URL to the Neon Postgres connection string
+#   - JWT_SECRET to a secure key
+#   - NODE_ENV=production
+# - In the `mizpah-client` service environment variables, set:
+#   - VITE_API_BASE_URL=https://<mizpah-server>.onrender.com/api
 # - Commit and push this file to your repo; Render will detect and can auto-deploy.

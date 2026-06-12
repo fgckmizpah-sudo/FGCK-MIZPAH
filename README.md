@@ -23,8 +23,9 @@ npm run dev
 - Default admin credentials:
   - username: `pastor`
   - password: `password123`
-- The backend now uses PostgreSQL instead of local JSON storage.
-- Set `DATABASE_URL` in `server/.env` before running.
+- The backend uses PostgreSQL via `DATABASE_URL`.
+- For shared, cross-device access, use an external free Postgres provider (Supabase, Neon, ElephantSQL, etc.).
+- Set `DATABASE_URL` in `server/.env` before running locally.
 
 ## Frontend
 
@@ -33,28 +34,57 @@ npm run dev
 
 ## Notes
 
-- The backend now uses PostgreSQL and reads `DATABASE_URL` from `server/.env` or Railway environment.
-- Add `JWT_SECRET` to `server/.env` or to Railway environment variables for a custom auth key.
+- The backend reads `DATABASE_URL` from `server/.env` or the deployment environment.
+- Add `JWT_SECRET` to `server/.env` or the deployment environment for auth.
 - Use `client/.env.example` and `server/.env.example` as templates.
 
 ## Deployment
 
-### Railway
+### Deploy to Railway with Neon Postgres
 
-1. Push this repo to GitHub.
-2. Create a new Railway project and connect the GitHub repository.
-3. Add a PostgreSQL plugin in Railway and copy its `DATABASE_URL` value.
-4. Set Railway environment variables:
-   - `DATABASE_URL` (from Railway Postgres plugin)
-   - `JWT_SECRET` (any secure value)
-   - `PORT=4000`
-   - `VITE_API_BASE_URL=/api`
-5. Railway will build using `Dockerfile` and `railway.json`.
-6. After deployment, Railway assigns a public URL such as:
+This app is configured to deploy on Railway with a free Neon Postgres database for cross-device shared data.
 
-```bash
-https://<your-project>.railway.app
-```
+**Prerequisites:**
+- Railway account (sign up at https://railway.app)
+- GitHub repository connected to Railway
+- Neon Postgres connection string (from https://neon.tech)
+
+**Steps:**
+
+1. Create a free Neon project (if not already done):
+   - Sign in at https://neon.tech
+   - Create a new project and branch
+   - Copy the database connection string
+
+2. Push your code to GitHub:
+   ```bash
+   git push origin main
+   ```
+
+3. In the Railway dashboard:
+   - Create a new project from your GitHub repository
+   - Add a web service pointing to this repository
+   - Set environment variables:
+     - `DATABASE_URL` = your Neon connection string
+     - `JWT_SECRET` = a secure random value
+     - `PORT` = `4000` (optional, defaults to 4000)
+     - `NODE_ENV` = `production`
+
+4. Railway will automatically detect the `Dockerfile` and `railway.json` and deploy the app.
+
+5. After deployment, Railway assigns a public URL such as:
+   ```
+   https://<project-name>-prod.up.railway.app
+   ```
+
+6. The app is now accessible at `https://<project-name>-prod.up.railway.app/` with the backend at `/api`.
+
+**Notes:**
+
+- The `Dockerfile` contains the complete build and runtime setup.
+- `railway.json` configures the web service and required environment variables.
+- Neon provides a free shared Postgres database accessible from Railway.
+- The backend serves the frontend from `client/dist` in production mode.
 
 ### Local production preview
 
