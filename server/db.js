@@ -1,4 +1,19 @@
-const { query, transaction, initDatabase } = require('./db-postgres');
+let query;
+let transaction;
+let initDatabase;
+
+if (process.env.DATABASE_URL) {
+  try {
+    const dbpg = require('./db-postgres');
+    query = dbpg.query;
+    transaction = dbpg.transaction;
+    initDatabase = dbpg.initDatabase;
+  } catch (e) {
+    // ignore and fall back to file-based store
+  }
+} else {
+  initDatabase = async () => Promise.resolve();
+}
 
 const memberColumns = [
   'id',
@@ -23,43 +38,53 @@ function mapRow(row) {
 }
 
 async function readData() {
-  const [admins, members, givings, tithes, attendance, expenses, projects, inventory, departments, departmentTransactions] = await Promise.all([
-    query('SELECT id, username, password, role FROM admins ORDER BY id').then((r) => r.rows),
-    query(`SELECT ${memberColumns.join(', ')} FROM members ORDER BY id`).then((r) => r.rows),
-    query('SELECT id, member_id AS "memberId", amount, giving_date AS "givingDate", category, notes FROM givings ORDER BY id').then((r) => r.rows),
-    query('SELECT id, member_id AS "memberId", amount, giving_date AS "givingDate", notes FROM tithes ORDER BY id').then((r) => r.rows),
-    query('SELECT id, date, category, total FROM attendance ORDER BY id').then((r) => r.rows),
-    query('SELECT id, expense, amount, date FROM expenses ORDER BY id').then((r) => r.rows),
-    query('SELECT id, project_name AS "projectName", member_id AS "memberId", amount, date FROM projects ORDER BY id').then((r) => r.rows),
-    query('SELECT id, item, qty, storage FROM inventory ORDER BY id').then((r) => r.rows),
-    query('SELECT id, name, description, created_at AS "createdAt" FROM departments ORDER BY id').then((r) => r.rows),
-    query('SELECT id, department, amount, date, transaction_type AS "transactionType", created_at AS "createdAt" FROM department_transactions ORDER BY id').then((r) => r.rows)
-  ]);
+  // If a Postgres-based implementation is available, use it
+  if (query) {
+    const [admins, members, givings, tithes, attendance, expenses, projects, inventory, departments, departmentTransactions] = await Promise.all([
+      query('SELECT id, username, password, role FROM admins ORDER BY id').then((r) => r.rows),
+      query(`SELECT ${memberColumns.join(', ')} FROM members ORDER BY id`).then((r) => r.rows),
+      query('SELECT id, member_id AS "memberId", amount, giving_date AS "givingDate", category, notes FROM givings ORDER BY id').then((r) => r.rows),
+      query('SELECT id, member_id AS "memberId", amount, giving_date AS "givingDate", notes FROM tithes ORDER BY id').then((r) => r.rows),
+      query('SELECT id, date, category, total FROM attendance ORDER BY id').then((r) => r.rows),
+      query('SELECT id, expense, amount, date FROM expenses ORDER BY id').then((r) => r.rows),
+      query('SELECT id, project_name AS "projectName", member_id AS "memberId", amount, date FROM projects ORDER BY id').then((r) => r.rows),
+      query('SELECT id, item, qty, storage FROM inventory ORDER BY id').then((r) => r.rows),
+      query('SELECT id, name, description, created_at AS "createdAt" FROM departments ORDER BY id').then((r) => r.rows),
+      query('SELECT id, department, amount, date, transaction_type AS "transactionType", created_at AS "createdAt" FROM department_transactions ORDER BY id').then((r) => r.rows)
+    ]);
 
-  const lastId = (items) => (items && items.length ? Math.max(...items.map((item) => Number(item.id))) : 0);
+    const lastId = (items) => (items && items.length ? Math.max(...items.map((item) => Number(item.id))) : 0);
 
-  return {
-    admins,
-    members,
-    givings,
-    tithes,
-    attendance,
-    expenses,
-    projects,
-    inventory,
-    departments,
-    departmentTransactions,
-    lastAdminId: lastId(admins),
-    lastMemberId: lastId(members),
-    lastGivingId: lastId(givings),
-    lastTitheId: lastId(tithes),
-    lastProjectId: lastId(projects),
-    lastInventoryId: lastId(inventory),
-    lastAttendanceId: lastId(attendance),
-    lastExpenseId: lastId(expenses),
-    lastDepartmentId: lastId(departments),
-    lastTransactionId: lastId(departmentTransactions)
-  };
+    return {
+      admins,
+      members,
+      givings,
+      tithes,
+      attendance,
+      expenses,
+      projects,
+      inventory,
+      departments,
+      departmentTransactions,
+      lastAdminId: lastId(admins),
+      lastMemberId: lastId(members),
+      lastGivingId: lastId(givings),
+      lastTitheId: lastId(tithes),
+      lastProjectId: lastId(projects),
+      lastInventoryId: lastId(inventory),
+      lastAttendanceId: lastId(attendance),
+      lastExpenseId: lastId(expenses),
+      lastDepartmentId: lastId(departments),
+      lastTransactionId: lastId(departmentTransactions)
+    };
+  }
+
+  // Fallback: file-based data store (church-data.json)
+  const dataPath = require('path').join(__dirname, 'church-data.json');
+  const fs = require('fs');
+  const raw = fs.readFileSync(dataPath, 'utf8');
+  const json = JSON.parse(raw || '{}');
+  return json;
 }
 
 function buildInsertStatement(table, columns, row) {
@@ -73,7 +98,9 @@ function buildInsertStatement(table, columns, row) {
 }
 
 async function writeData(data) {
-  await transaction(async (client) => {
+  // If a DB transaction implementation exists, use it
+  if (transaction) {
+    await transaction(async (client) => {
     const deleteOrder = [
       'department_transactions',
       'departments',
@@ -154,15 +181,38 @@ async function writeData(data) {
       description: item.description,
       created_at: item.createdAt
     })));
-    await insertRows('department_transactions', (data.departmentTransactions || []).map((item) => ({
-      id: item.id,
-      department: item.department,
-      amount: item.amount,
-      date: item.date,
-      transaction_type: item.transactionType,
-      created_at: item.createdAt
-    })));
-  });
+      await insertRows('department_transactions', (data.departmentTransactions || []).map((item) => ({
+        id: item.id,
+        department: item.department,
+        amount: item.amount,
+        date: item.date,
+        transaction_type: item.transactionType,
+        created_at: item.createdAt
+      })));
+    });
+    // emit realtime event when DB-backed write completes
+    try {
+      const { getIo } = require('./realtime');
+      const io = getIo();
+      if (io) io.emit('data-changed', data);
+    } catch (e) {
+      // ignore
+    }
+    return;
+  }
+
+  // Fallback: write to church-data.json
+  const fs = require('fs');
+  const path = require('path');
+  const dataPath = path.join(__dirname, 'church-data.json');
+  fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf8');
+  try {
+    const { getIo } = require('./realtime');
+    const io = getIo();
+    if (io) io.emit('data-changed', data);
+  } catch (e) {
+    // ignore
+  }
 }
 
 module.exports = {

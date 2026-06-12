@@ -1,0 +1,32 @@
+# Render manifest for Mizpah Management
+# Replace <GITHUB_REPO> and <BRANCH> if you want automatic linking.
+# After committing this file, connect your GitHub repo in Render and create services.
+
+services:
+  - type: web
+    name: mizpah-server
+    env: node
+    plan: starter
+    branch: main # change if needed
+    buildCommand: "npm --prefix server install"
+    startCommand: "npm --prefix server start"
+
+  - type: static
+    name: mizpah-client
+    plan: free
+    branch: main # change if needed
+    buildCommand: "npm --prefix client install && npm --prefix client run build"
+    publishPath: client/dist
+
+databases:
+  - type: postgres
+    name: mizpah-db
+    plan: starter
+
+# Notes:
+# - On Render dashboard, after the Postgres DB is created, copy the DATABASE_URL into
+#   the `mizpah-server` service environment variables (key: DATABASE_URL).
+# - Set JWT_SECRET and NODE_ENV=production in the server's env vars for security.
+# - In the client service, set an env var `VITE_API_BASE_URL` to
+#   "https://<mizpah-server>.onrender.com/api" (replace with your backend URL).
+# - Commit and push this file to your repo; Render will detect and can auto-deploy.

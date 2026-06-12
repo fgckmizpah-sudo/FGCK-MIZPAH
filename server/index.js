@@ -15,7 +15,7 @@ const expensesRoutes = require('./routes/expenses');
 const departmentsRoutes = require('./routes/departments');
 const departmentTransactionsRoutes = require('./routes/department-transactions');
 const bulkSmsRoutes = require('./routes/bulk-sms');
-const { initDatabase } = require('./db-postgres');
+const { initDatabase } = require('./db');
 
 dotenv.config();
 
@@ -59,8 +59,14 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message || 'Server error' });
 });
 
+const http = require('http');
+const { setIo } = require('./realtime');
+
 initDatabase().then(() => {
-  app.listen(port, () => {
+  const server = http.createServer(app);
+  // initialize realtime sockets (allows CORS to frontend)
+  setIo(server, { origin: process.env.CORS_ORIGIN || '*' });
+  server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
   });
 }).catch((err) => {
